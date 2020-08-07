@@ -41,7 +41,6 @@ def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[], 
         for match in matches:
             # Finds the robot's position number in TBA
             robot_position = str(get_robot_number(match, team_key))
-            print(metric_name + robot_position)
             metric_values.append(
                 match['score_breakdown'][get_alliance_color(match, team_key)][metric_name + robot_position])
         return round(metric_values.count(categorical_value) / len(metric_values), 3) if len(

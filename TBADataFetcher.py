@@ -29,7 +29,7 @@ class TBADataFetcher:
         # TBA data handler
         self.tba = TBA(authkey)
 
-    def get_metric_statistic(self, metric_name, calculations=[], metric_position_based=False, categorical_value=None,
+    def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False, categorical_value=None,
                              exclude_playoffs=True):
         """
         Returns a dictionary of calculated statistics (mean/min/max/stdev/count) for a given metric (ex. totalPoints)
