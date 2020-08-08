@@ -29,7 +29,8 @@ class TBADataFetcher:
         # TBA data handler
         self.tba = TBA(authkey)
 
-    def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False, categorical_value=None,
+    def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False,
+                             categorical_value=None,
                              exclude_playoffs=True):
         """
         Returns a dictionary of calculated statistics (mean/min/max/stdev/count) for a given metric (ex. totalPoints)
@@ -118,8 +119,34 @@ class TBADataFetcher:
 
         return calculated_statistics
 
-    def get_event_OPRs(self, metric='totalPoints', exclude_playoffs=True):
+    def get_event_metric_statistics(self, metric_name, calculations=['mean'], metric_position_based=False,
+                                    categorical_value=None,
+                                    exclude_playoffs=True):
+        if self.event_key is None:
+            print("A TBA event key is needed to perform this calculation")
+            return
 
+        tba = TBA(self.authkey)
+
+        event_team_keys = [team.key for team in tba.event_teams(self.event_key, simple=True)]
+
+        all_teams_statistics = dict.fromkeys(calculations, {}) if not metric_position_based else dict()
+
+        for team_key in event_team_keys:
+            calculated_statistics = get_metric_statistic(self.authkey, team_key, self.year, metric_name,
+                                                         calculations,
+                                                         metric_position_based,
+                                                         categorical_value,
+                                                         exclude_playoffs, event_key=self.event_key)
+            if metric_position_based:
+                all_teams_statistics[team_key] = calculated_statistics
+            else:
+                for calculation_type in calculated_statistics.keys():
+                    all_teams_statistics[calculation_type][team_key] = calculated_statistics[calculation_type]
+
+        return all_teams_statistics
+
+    def get_event_OPRs(self, metric='totalPoints', exclude_playoffs=True):
         """
         Calculates the OPR of all the teams at an event.
 

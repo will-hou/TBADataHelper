@@ -15,19 +15,23 @@ year:int = the year the metric is from
 metric_name:string = the TBA metric under scoring_breakdown to get averages for
 metric_position_based: boolean = whether the metric is categorized in TBA based on robot_position. default=false
 categorical_value:string = the categorical value to get averages by
+exclude_playoff: boolean = whether to exclude playoff matches from calculations
+event_key: string = if specified, only include matches played at the given event in calculations.
 """
 
 
-def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[], metric_position_based=False,
-                         categorical_value=None,
-                         exclude_playoffs=False):
+def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[],
+                         metric_position_based=False, categorical_value=None, exclude_playoffs=True, event_key=None):
     # TBA data handler
     tba = TBA(authkey)
 
     # Get list of team matches from TBA
-    matches = get_qualification_matches(
-        tba.team_matches(team=team_key, year=year)) if exclude_playoffs else tba.team_matches(
-        team=team_key, year=year)
+    if event_key:
+        matches = tba.team_matches(team=team_key, event=event_key)
+    else:
+        matches = tba.team_matches(team=team_key, year=year)
+
+    matches = get_qualification_matches(matches) if exclude_playoffs else matches
 
     # Only keep matches that have been played
     matches = get_played_matches(matches)
@@ -35,7 +39,7 @@ def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[], 
     # Handles metrics that are measured through a robot's position, ex. endgame location
     if metric_position_based:
         if categorical_value is None:
-            print("You must specify a categorical_value to count occurences of. See docstring for more info")
+            print("You must specify a categorical_value to count occurrences of. See docstring for more info")
             return
         metric_values = []
         for match in matches:
@@ -58,7 +62,7 @@ def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[], 
     calculated_statistics = {}
 
     # Perform statistical calculations on list of metric values
-    print(metric_values)
+    # print(metric_values)
     for calculation in calculations:
         calculated_statistics[calculation] = calculation_map[calculation](metric_values)
 
