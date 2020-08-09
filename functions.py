@@ -1,6 +1,6 @@
 from tbapy import TBA
 from .utils import *
-from statistics import mean, mode, stdev
+from statistics import mean, mode, stdev, median
 
 """
 - This function returns the average value of a given metric
@@ -54,7 +54,7 @@ def get_metric_statistic(authkey, team_key, year, metric_name, calculations=[],
     metric_values = [match["score_breakdown"][get_alliance_color(match, team_key)][metric_name] for match in matches]
 
     # Associates a calculation keyword to its appropriate function
-    calculation_map = {'mean': mean, 'max': max, 'min': min, 'stdev': stdev, 'count': len}
+    calculation_map = {'mean': mean, 'med': median, 'max': max, 'min': min, 'stdev': stdev, 'count': len}
 
     # If the metric values are integers, return the average value. If they are strings, return the value that occurs most often
 

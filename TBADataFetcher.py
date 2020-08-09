@@ -30,8 +30,7 @@ class TBADataFetcher:
         self.tba = TBA(authkey)
 
     def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False,
-                             categorical_value=None,
-                             exclude_playoffs=True):
+                             categorical_value=None, exclude_playoffs=True, event_key=None):
         """
         Returns a dictionary of calculated statistics (mean/min/max/stdev/count) for a given metric (ex. totalPoints)
 
@@ -43,10 +42,11 @@ class TBADataFetcher:
         metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
 
         Optional Parameters:
-        calculations: list<str> = list of calculations to perform on a team's metric values. max, min, mean, stdev, count. default=['mean']
+        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
         metric_position_based: boolean = whether the metric is categorized in TBA based on robot_position. default=False
-        categorical_value: str = the categorical value to get averages by. default=None
+        categorical_value: str = the categorical value to count. default=None
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
+        event_key: str: = specify an event_key if you only want to perform calculations on matches played at a certain event. default=None
 
         Returns:
         calculated_statistics: dict = Dictionary of keys corresponding to the calculation name and values corresponding
@@ -60,7 +60,7 @@ class TBADataFetcher:
         return get_metric_statistic(self.authkey, self.team_key, self.year, metric_name, calculations,
                                     metric_position_based,
                                     categorical_value,
-                                    exclude_playoffs)
+                                    exclude_playoffs, event_key)
 
     def get_team_event_OPR_statistic(self, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
         """
@@ -122,16 +122,41 @@ class TBADataFetcher:
     def get_event_metric_statistics(self, metric_name, calculations=['mean'], metric_position_based=False,
                                     categorical_value=None,
                                     exclude_playoffs=True):
+        """
+        Returns a dictionary of calculated statistics (mean/med/min/max/stdev/count) for a given metric (ex. totalPoints)
+        for all teams at an event
+
+        Required Parameters:
+        metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
+
+        Optional Parameters:
+        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
+        metric_position_based: boolean = whether the metric is categorized in TBA based on robot_position. default=False
+        categorical_value: str = the categorical value to count. default=None
+        exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
+
+        Returns:
+        calculated_event_statistics: dict = Returns (possibly nested) dictionary holding the calculated statistic(s)
+        for a given metric for each team at the event.
+        If metric is position based, team_keys are keys. ex.) {'frc2521': 0.76, ...}
+        If not, Outer key is the calculation name and inner keys are team keys ex.) {mean: {'frc2521': 100, ...}}
+        """
+
         if self.event_key is None:
             print("A TBA event key is needed to perform this calculation")
             return
+
+        if metric_position_based and len(calculations) > 1:
+            print(
+                f"A a list of calculations {calculations} was given but only the proportion of times that the"
+                f" categorical_value was recorded in each of the teams' matches will be returned")
 
         tba = TBA(self.authkey)
 
         event_team_keys = [team.key for team in tba.event_teams(self.event_key, simple=True)]
 
+        # Creates (maybe nested) dictionary holding the calculated statistic(s) for a given metric for each team at the event
         all_teams_statistics = dict.fromkeys(calculations, {}) if not metric_position_based else dict()
-
         for team_key in event_team_keys:
             calculated_statistics = get_metric_statistic(self.authkey, team_key, self.year, metric_name,
                                                          calculations,
