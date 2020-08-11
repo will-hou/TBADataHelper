@@ -13,9 +13,9 @@ class TBADataFetcher:
 
     Optional constructor arguments:
     team_key: str = The TBA key for a team. Equal to 'frc+[team_number]'
-                    Required for the get_metric_average and get_team_CC methods
+                    Required for the get_metric_statistic and get_team_OPR_statistic methods
     event_key: str = The TBA key for an event
-                    Required for the get_event_CCs method
+                    Required for the get_event_metric_statistics and get_event_OPRs method
     """
 
     def __init__(self, authkey, year, team_key=None, event_key=None):
@@ -32,7 +32,7 @@ class TBADataFetcher:
     def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False,
                              categorical_value=None, exclude_playoffs=True, event_key=None):
         """
-        Returns a dictionary of calculated statistics (mean/min/max/stdev/count) for a given metric (ex. totalPoints)
+        Returns a dictionary of calculated statistics mean/med/min/max/stdev/count for a given metric (ex. totalPoints)
 
         - If the metric is categorized in TBA based on robot position(ex. endgameRobot2, etc.), the metric_position_based
         and categorical_value parameters need to be specified. The percentage of times that categorical_value was recorded
@@ -62,9 +62,9 @@ class TBADataFetcher:
                                     categorical_value,
                                     exclude_playoffs, event_key)
 
-    def get_team_event_OPR_statistic(self, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
+    def get_team_OPR_statistic(self, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
         """
-        Calculates the max/min/mean/count/stdev of a team's OPR at every competition they've attended
+        Returns a dictionary of the mean/med/min/max/stdev/count of a team's OPR at every competition they've attended
 
         Parameters:
 
@@ -77,7 +77,6 @@ class TBADataFetcher:
         calculated_statistics: dict = Dictionary of keys corresponding to the calculation name and
         values corresponding to their value ex.) {mean: 56, max: 56, ...}
         """
-
         if self.team_key is None:
             print("A TBA team key is needed to perform this calculation")
             return
@@ -104,9 +103,9 @@ class TBADataFetcher:
                 continue
 
         # Associates a calculation keyword to its appropriate function
-        calculation_map = {'mean': mean, 'max': max, 'min': min, 'stdev': stdev, 'count': len}
+        calculation_map = {'mean': mean, 'med': median, 'max': max, 'min': min, 'stdev': stdev, 'count': len}
 
-        # Dictionary of {calcualtion keyword:value} pairs to be returned
+        # Dictionary of {calculation keyword:value} pairs to be returned
         calculated_statistics = {}
 
         # Perform statistical calculations on list of event CCs
@@ -115,7 +114,7 @@ class TBADataFetcher:
                 calculated_statistics[calculation] = calculation_map[calculation]([x[1] for x in all_event_CCs])
             except:
                 print(
-                    "Make sure your calculation is either max, min, mean, count, or stdev. If using stdev, there may not be more than 1 event CC yet")
+                    "Make sure your calculation is either max, min, mean, med, count, or stdev. If using stdev, there may not be more than 1 event CC yet")
 
         return calculated_statistics
 
@@ -173,7 +172,7 @@ class TBADataFetcher:
 
     def get_event_OPRs(self, metric='totalPoints', exclude_playoffs=True):
         """
-        Calculates the OPR of all the teams at an event.
+        Returns a dictionary containing the OPR of all teams at an event.
 
         Parameters:
 
