@@ -51,7 +51,7 @@ def check_matches_exist(authkey, year, team_key=None, event_key=None, exclude_pl
 # Given a list of matches, returns the list with non qualification matches removed
 def get_qualification_matches(matches):
     quals = []
-    for (index, match) in enumerate(matches):
+    for match in matches:
         if match["comp_level"] == "qm":
             quals.append(match)
     return quals
@@ -60,7 +60,7 @@ def get_qualification_matches(matches):
 # Given a list of matches, returns the list with matches that haven't been played removed
 def get_played_matches(matches):
     played = []
-    for (index, match) in enumerate(matches):
+    for match in matches:
         if match["score_breakdown"] is not None:
             played.append(match)
     return played

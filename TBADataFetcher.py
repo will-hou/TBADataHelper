@@ -69,7 +69,7 @@ class TBADataFetcher:
         Parameters:
 
         metric: str = the TBA/FIRSTApi metric to calculate contribution for. default='totalPoints'
-        calculations: list<str> = list of calculations to perform on a team's event OPR. max, min, mean, stdev, count. default=['mean']
+        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
 
         Returns:
@@ -87,13 +87,13 @@ class TBADataFetcher:
         for event in self.tba.team_events(team=self.team_key, year=self.year, keys=True):
             # Only calculate event CCs for events that have had matches
             if check_matches_exist(self.authkey, 2019, event_key=event, exclude_playoffs=exclude_playoffs):
-                # HOTFIX: Events that aren't stored in TBA with standardized conventions will break event_CC calculations. Such events will be skipped over
+                # HOTFIX: Events that aren't stored in TBA with standardized conventions (such as offseason events)
+                # will break event OPR calculations. Such events will be skipped over
                 try:
                     event_CCs = event_OPR(self.authkey, event, metric, exclude_playoffs)
                 except:
                     print("Error in calculating CCs for event_key:", event)
                     continue
-
                 # Skip over any teams that didn't play any matches in their event
                 try:
                     all_event_CCs.append((event, event_CCs.calculate_contribution()[self.team_key]))
