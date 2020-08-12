@@ -6,30 +6,20 @@ from statistics import stdev
 
 class TBADataFetcher:
     """
-    Main class for fetching data and analytics from TBA
+    Class for fetching data and analytics from TBA
 
-    Required constructor arguments:
+    Constructor arguments:
     year: int = The year to get data from
-
-    Optional constructor arguments:
-    team_key: str = The TBA key for a team. Equal to 'frc+[team_number]'
-                    Required for the get_metric_statistic and get_team_OPR_statistic methods
-    event_key: str = The TBA key for an event
-                    Required for the get_event_metric_statistics and get_event_OPRs method
     """
 
     def __init__(self, authkey, year, team_key=None, event_key=None):
         self.authkey = authkey
         self.year = year
 
-        # Optional Parameters
-        self.team_key = team_key
-        self.event_key = event_key
-
         # TBA data handler
         self.tba = TBA(authkey)
 
-    def get_metric_statistic(self, metric_name, calculations=['mean'], metric_position_based=False,
+    def get_team_metric_statistics(self, team_key, metric_name, calculations=['mean'], metric_position_based=False,
                              categorical_value=None, exclude_playoffs=True, event_key=None):
         """
         Returns a dictionary of calculated statistics mean/med/min/max/stdev/count for a given metric (ex. totalPoints)
@@ -39,6 +29,7 @@ class TBADataFetcher:
         for the team will be returned in decimal form.
 
         Required Parameters:
+        team_key: str = the team key ('frc'+ TEAM_NUMBER) to get calculations for
         metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
 
         Optional Parameters:
@@ -53,22 +44,22 @@ class TBADataFetcher:
         to the calculated value ex.) {mean: 77, max: 154, ...}
         """
 
-        if self.team_key is None:
+        if team_key is None:
             print("A TBA team key is needed to perform this calculation")
             return
 
-        return get_metric_statistic(self.authkey, self.team_key, self.year, metric_name, calculations,
+        return get_metric_statistic(self.authkey, team_key, self.year, metric_name, calculations,
                                     metric_position_based,
                                     categorical_value,
                                     exclude_playoffs, event_key)
 
-    def get_team_OPR_statistic(self, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
+    def get_team_OPR_statistic(self, team_key, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
         """
         Returns a dictionary of the mean/med/min/max/stdev/count of a team's OPR at every competition they've attended
 
         Parameters:
-
-        metric: str = the TBA/FIRSTApi metric to calculate contribution for. default='totalPoints'
+        team_key: str = the team key ('frc'+ TEAM_NUMBER) to get calculations for
+        metric: str = the TBA metric to calculate contribution for. default='totalPoints'
         calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
 
@@ -77,13 +68,13 @@ class TBADataFetcher:
         calculated_statistics: dict = Dictionary of keys corresponding to the calculation name and
         values corresponding to their value ex.) {mean: 56, max: 56, ...}
         """
-        if self.team_key is None:
+        if team_key is None:
             print("A TBA team key is needed to perform this calculation")
             return
 
         # List of tuples of format (event_key, event_CC for team)
         all_event_CCs = []
-        for event in self.tba.team_events(team=self.team_key, year=self.year, keys=True):
+        for event in self.tba.team_events(team=team_key, year=self.year, keys=True):
             # Only calculate event CCs for events that have had matches
             if check_matches_exist(self.authkey, 2019, event_key=event, exclude_playoffs=exclude_playoffs):
                 # HOTFIX: Events that aren't stored in TBA with standardized conventions (such as offseason events)
@@ -95,9 +86,9 @@ class TBADataFetcher:
                     continue
                 # Skip over any teams that didn't play any matches in their event
                 try:
-                    all_event_CCs.append((event, event_CCs.calculate_contribution()[self.team_key]))
+                    all_event_CCs.append((event, event_CCs.calculate_contribution()[team_key]))
                 except KeyError:
-                    print("Team: ", self.team_key, "didn't play any matches")
+                    print("Team: ", team_key, "didn't play any matches")
                     continue
             else:
                 continue
@@ -118,7 +109,7 @@ class TBADataFetcher:
 
         return calculated_statistics
 
-    def get_event_metric_statistics(self, metric_name, calculations=['mean'], metric_position_based=False,
+    def get_event_metric_statistics(self, event_key, metric_name, calculations=['mean'], metric_position_based=False,
                                     categorical_value=None,
                                     exclude_playoffs=True):
         """
@@ -126,6 +117,7 @@ class TBADataFetcher:
         for all teams at an event
 
         Required Parameters:
+        event_key: str: = the event to get team metric statistics from
         metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
 
         Optional Parameters:
@@ -141,7 +133,7 @@ class TBADataFetcher:
         If not, Outer key is the calculation name and inner keys are team keys ex.) {mean: {'frc2521': 100, ...}}
         """
 
-        if self.event_key is None:
+        if event_key is None:
             print("A TBA event key is needed to perform this calculation")
             return
 
@@ -152,7 +144,7 @@ class TBADataFetcher:
 
         tba = TBA(self.authkey)
 
-        event_team_keys = [team.key for team in tba.event_teams(self.event_key, simple=True)]
+        event_team_keys = [team.key for team in tba.event_teams(event_key, simple=True)]
 
         # Creates (maybe nested) dictionary holding the calculated statistic(s) for a given metric for each team at the event
         all_teams_statistics = dict.fromkeys(calculations, {}) if not metric_position_based else dict()
@@ -161,7 +153,7 @@ class TBADataFetcher:
                                                          calculations,
                                                          metric_position_based,
                                                          categorical_value,
-                                                         exclude_playoffs, event_key=self.event_key)
+                                                         exclude_playoffs, event_key=event_key)
             if metric_position_based:
                 all_teams_statistics[team_key] = calculated_statistics
             else:
@@ -170,12 +162,12 @@ class TBADataFetcher:
 
         return all_teams_statistics
 
-    def get_event_OPRs(self, metric='totalPoints', exclude_playoffs=True):
+    def get_event_OPRs(self, event_key, metric='totalPoints', exclude_playoffs=True):
         """
         Returns a dictionary containing the OPR of all teams at an event.
 
         Parameters:
-
+        event_key: str: = the event to get team OPRs from
         metric: str = the TBA/FIRSTApi metric to calculate contribution for. default='totalPoints'
         Changing this will result in something other than OPRs being returned. Don't touch unless you know what you're doing
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
@@ -185,9 +177,9 @@ class TBADataFetcher:
         calculated_contributions: dictionary = Keys are TBA team_keys with values being the team's OPR at the event
         ex.) {frc2521: 65, frc254: 148, ...}
         """
-        if self.event_key is None:
+        if event_key is None:
             print("A TBA event key is needed to perform this calculation")
             return
 
-        event_CCs = event_OPR(self.authkey, self.event_key, metric, exclude_playoffs)
+        event_CCs = event_OPR(self.authkey, event_key, metric, exclude_playoffs)
         return event_CCs.calculate_contribution()
