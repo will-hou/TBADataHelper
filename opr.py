@@ -84,11 +84,9 @@ class event_OPR:
         # Return the calculated contribution for for the given
 
         calculated_contributions = {}
-        counter = 0
         # Creates a dictionary with keys being TBA team keys and values being that team's CC for the given metric
         for (index, team) in enumerate(self.team_matrix_map):
             calculated_contributions[team] = solutions[index][0]
-            counter += 1
 
         return calculated_contributions
 
