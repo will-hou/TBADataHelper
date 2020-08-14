@@ -1,31 +1,29 @@
-Rename to TBAgg?
-
 A simple package used to perform aggregate and OPR calculations on FRC match data collected from 2016 and onwards.
 
 # Installation
 Make sure you have a TBA Auth Key. Learn what this is and how to get one [here](https://www.thebluealliance.com/apidocs)
 
-
-1. Run `git clone https://github.com/will-hou/TBADataFetcher.git` in a directory of your choice
-2. Move the `TBADataFetcher` folder into the project directory you plan on using it in
+1. Run `git clone https://github.com/will-hou/TBADataHelper.git` in a directory of your choice
+2. Move the `TBADataHelper` folder into the project directory you plan on using it in
 
 Example file structure:
 ```
-MyAnalyticsProgram>
-    TBADataFetcher
-    __init__.py
-    run.py
-    README.md
+├── MyAnalyticsProgram
+├── TBADataHelper
+    ├──... 
+├── __init__.py
+├── run.py
+└── README.md
 ```
 
-TBADataFetcher uses [tbapy](https://github.com/frc1418/tbapy) to make requests to the TBA API v3. Make sure that package is installed in addition to [numpy](https://github.com/numpy/numpy) 
+TBADataHelper uses [tbapy](https://github.com/frc1418/tbapy) to make requests to the TBA API v3. Make sure that package is installed in addition to [numpy](https://github.com/numpy/numpy) 
 
 # Usage
 
 To create an instance of the TBAFetcher class:
 ```
-fetcher = TBA('###YOUR_AUTHKEY_HERE###', year)
-fetcher = TBA('###MY_AUTHKEY###', 2020)
+fetcher = TBADataHelper('###YOUR_AUTHKEY_HERE###', year)
+fetcher = TBADataHelper('###MY_AUTHKEY###', 2020)
 ```
 ### Methods taking a team_key:
 The string `'frc'` + the string `'team_number'` ex.) `'frc2521'`
@@ -100,7 +98,7 @@ Possible categorical values (found on [FIRST Events API](https://frcevents2.docs
  ### Print the minimum, maximum, and average number of points scored by the team's alliance in all their matches
  ```
 # Set up the fetcher to only include data from 2018 matches
-fetcher = TBADataFetcher('###MY_AUTHKEY###', 2018)
+fetcher = TBADataHelper('###MY_AUTHKEY###', 2018)
 # Calculate the min, max, and mean statistics for the totalPoints value across all matches
 team_min_max_mean_total_points = fetcher.get_team_metric_statistics(team_key='frc2521', metric_name='totalPoints',
                                                                     exclude_playoffs=False,

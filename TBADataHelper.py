@@ -4,9 +4,9 @@ from tbapy import TBA
 from statistics import stdev
 
 
-class TBADataFetcher:
+class TBADataHelper:
     """
-    Class for fetching data and analytics from TBA
+    Class for performing aggregate and OPR calculations on match data fetched from TBA APIv3
 
     Constructor arguments:
     year: int = The year to get data from
