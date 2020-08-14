@@ -20,7 +20,7 @@ TBADataHelper uses [tbapy](https://github.com/frc1418/tbapy) to make requests to
 
 # Usage
 
-To create an instance of the TBAFetcher class:
+To create an instance of the TBADataHelper class:
 ```
 fetcher = TBADataHelper('###YOUR_AUTHKEY_HERE###', year)
 fetcher = TBADataHelper('###MY_AUTHKEY###', 2020)
@@ -44,7 +44,7 @@ Returns a dictionary containing the OPR of all teams at an event.
 
 ##### Read more about specific method arguments using help() or looking at examples below
 
-## Example Usages
+# Example Usages
 
 ### Print all team OPRs at an event in descending order
 ```
@@ -111,7 +111,7 @@ Outputs:
 {'min': 66, 'max': 469, 'mean': 309.94736842105266}
 ```
 
-###Notes/Contributing/Bug Reports:
+### Notes/Contributing/Bug Reports:
 The majority of this package was written in a rush during the 2018 build season. The methods have been tested fairly
 rigorously for accuracy but I can't guarantee a 100% bug-free experience, especially if you're trying to aggregate data
 for all teams competing in a season. I don't plan on adding any  new features at this time but will respond to any
