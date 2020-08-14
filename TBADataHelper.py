@@ -19,22 +19,22 @@ class TBADataHelper:
         # TBA data handler
         self.tba = TBA(authkey)
 
-    def get_team_metric_statistics(self, team_key, metric_name, calculations=['mean'], metric_position_based=False,
+    def get_team_field_statistics(self, team_key, field_name, calculations=['mean'], field_position_based=False,
                              categorical_value=None, exclude_playoffs=True, event_key=None):
         """
-        Returns a dictionary of calculated statistics mean/med/min/max/stdev/count for a given metric (ex. totalPoints)
+        Returns a dictionary of calculated statistics mean/med/min/max/stdev/count for a given field (ex. totalPoints)
 
-        - If the metric is categorized in TBA based on robot position(ex. endgameRobot2, etc.), the metric_position_based
+        - If the field is categorized in TBA based on robot position(ex. endgameRobot2, etc.), the field_position_based
         and categorical_value parameters need to be specified. The percentage of times that categorical_value was recorded
         for the team will be returned in decimal form.
 
         Required Parameters:
         team_key: str = the team key ('frc'+ TEAM_NUMBER) to get calculations for
-        metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
+        field_name: str = the TBA field under scoring_breakdown to get calculations for (ex. totalPoints)
 
         Optional Parameters:
-        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
-        metric_position_based: boolean = whether the metric is categorized in TBA based on robot_position. default=False
+        calculations: list<str> = list of calculations to perform on a team's field values. mean, med, min, max, stdev, count. default=['mean']
+        field_position_based: boolean = whether the field is categorized in TBA based on robot_position. default=False
         categorical_value: str = the categorical value to count. default=None
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
         event_key: str: = specify an event_key if you only want to perform calculations on matches played at a certain event. default=None
@@ -48,19 +48,19 @@ class TBADataHelper:
             print("A TBA team key is needed to perform this calculation")
             return
 
-        return get_metric_statistic(self.authkey, team_key, self.year, metric_name, calculations,
-                                    metric_position_based,
+        return get_field_statistic(self.authkey, team_key, self.year, field_name, calculations,
+                                    field_position_based,
                                     categorical_value,
                                     exclude_playoffs, event_key)
 
-    def get_team_OPR_statistic(self, team_key, metric='totalPoints', calculations=['mean'], exclude_playoffs=True):
+    def get_team_OPR_statistic(self, team_key, field='totalPoints', calculations=['mean'], exclude_playoffs=True):
         """
         Returns a dictionary of the mean/med/min/max/stdev/count of a team's OPR at every competition they've attended
 
         Parameters:
         team_key: str = the team key ('frc'+ TEAM_NUMBER) to get calculations for
-        metric: str = the TBA metric to calculate contribution for. default='totalPoints'
-        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
+        field: str = the TBA field to calculate contribution for. default='totalPoints'
+        calculations: list<str> = list of calculations to perform on a team's field values. mean, med, min, max, stdev, count. default=['mean']
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
 
         Returns:
@@ -80,7 +80,7 @@ class TBADataHelper:
                 # HOTFIX: Events that aren't stored in TBA with standardized conventions (such as offseason events)
                 # will break event OPR calculations. Such events will be skipped over
                 try:
-                    event_CCs = event_OPR(self.authkey, event, metric, exclude_playoffs)
+                    event_CCs = event_OPR(self.authkey, event, field, exclude_playoffs)
                 except:
                     print("Error in calculating CCs for event_key:", event)
                     continue
@@ -109,27 +109,27 @@ class TBADataHelper:
 
         return calculated_statistics
 
-    def get_event_metric_statistics(self, event_key, metric_name, calculations=['mean'], metric_position_based=False,
+    def get_event_field_statistics(self, event_key, field_name, calculations=['mean'], field_position_based=False,
                                     categorical_value=None,
                                     exclude_playoffs=True):
         """
-        Returns a dictionary of calculated statistics (mean/med/min/max/stdev/count) for a given metric (ex. totalPoints)
+        Returns a dictionary of calculated statistics (mean/med/min/max/stdev/count) for a given field (ex. totalPoints)
         for all teams at an event
 
         Required Parameters:
-        event_key: str: = the event to get team metric statistics from
-        metric_name: str = the TBA metric under scoring_breakdown to get calculations for (ex. totalPoints)
+        event_key: str: = the event to get team field statistics from
+        field_name: str = the TBA field under scoring_breakdown to get calculations for (ex. totalPoints)
 
         Optional Parameters:
-        calculations: list<str> = list of calculations to perform on a team's metric values. mean, med, min, max, stdev, count. default=['mean']
-        metric_position_based: boolean = whether the metric is categorized in TBA based on robot_position. default=False
+        calculations: list<str> = list of calculations to perform on a team's field values. mean, med, min, max, stdev, count. default=['mean']
+        field_position_based: boolean = whether the field is categorized in TBA based on robot_position. default=False
         categorical_value: str = the categorical value to count. default=None
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
 
         Returns:
         calculated_event_statistics: dict = Returns (possibly nested) dictionary holding the calculated statistic(s)
-        for a given metric for each team at the event.
-        If metric is position based, team_keys are keys. ex.) {'frc2521': 0.76, ...}
+        for a given field for each team at the event.
+        If field is position based, team_keys are keys. ex.) {'frc2521': 0.76, ...}
         If not, Outer key is the calculation name and inner keys are team keys ex.) {mean: {'frc2521': 100, ...}}
         """
 
@@ -137,7 +137,7 @@ class TBADataHelper:
             print("A TBA event key is needed to perform this calculation")
             return
 
-        if metric_position_based and len(calculations) > 1:
+        if field_position_based and len(calculations) > 1:
             print(
                 f"A a list of calculations {calculations} was given but only the proportion of times that the"
                 f" categorical_value was recorded in each of the teams' matches will be returned")
@@ -146,15 +146,15 @@ class TBADataHelper:
 
         event_team_keys = [team.key for team in tba.event_teams(event_key, simple=True)]
 
-        # Creates (maybe nested) dictionary holding the calculated statistic(s) for a given metric for each team at the event
-        all_teams_statistics = dict.fromkeys(calculations, {}) if not metric_position_based else dict()
+        # Creates (maybe nested) dictionary holding the calculated statistic(s) for a given field for each team at the event
+        all_teams_statistics = dict.fromkeys(calculations, {}) if not field_position_based else dict()
         for team_key in event_team_keys:
-            calculated_statistics = get_metric_statistic(self.authkey, team_key, self.year, metric_name,
+            calculated_statistics = get_field_statistic(self.authkey, team_key, self.year, field_name,
                                                          calculations,
-                                                         metric_position_based,
+                                                         field_position_based,
                                                          categorical_value,
                                                          exclude_playoffs, event_key=event_key)
-            if metric_position_based:
+            if field_position_based:
                 all_teams_statistics[team_key] = calculated_statistics
             else:
                 for calculation_type in calculated_statistics.keys():
@@ -162,13 +162,13 @@ class TBADataHelper:
 
         return all_teams_statistics
 
-    def get_event_OPRs(self, event_key, metric='totalPoints', exclude_playoffs=True):
+    def get_event_OPRs(self, event_key, field='totalPoints', exclude_playoffs=True):
         """
         Returns a dictionary containing the OPR of all teams at an event.
 
         Parameters:
         event_key: str: = the event to get team OPRs from
-        metric: str = the TBA/FIRSTApi metric to calculate contribution for. default='totalPoints'
+        field: str = the TBA/FIRSTApi field to calculate contribution for. default='totalPoints'
         Changing this will result in something other than OPRs being returned. Don't touch unless you know what you're doing
         exclude_playoffs: boolean = whether to exclude playoff matches from calculations. default = True
 
@@ -181,5 +181,5 @@ class TBADataHelper:
             print("A TBA event key is needed to perform this calculation")
             return
 
-        event_CCs = event_OPR(self.authkey, event_key, metric, exclude_playoffs)
+        event_CCs = event_OPR(self.authkey, event_key, field, exclude_playoffs)
         return event_CCs.calculate_contribution()
