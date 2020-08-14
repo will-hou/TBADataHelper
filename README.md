@@ -1,6 +1,4 @@
-Needs name change
-
-To Do
+Rename to TBAgg?
 
 A simple package used to perform aggregate and OPR calculations on FRC match data collected from 2016 and onwards.
 
@@ -115,4 +113,11 @@ Outputs:
 {'min': 66, 'max': 469, 'mean': 309.94736842105266}
 ```
 
+###Notes/Contributing/Bug Reports:
+The majority of this package was written in a rush during the 2018 build season. The methods have been tested fairly
+rigorously for accuracy but I can't guarantee a 100% bug-free experience, especially if you're trying to aggregate data
+for all teams competing in a season. I don't plan on adding any  new features at this time but will respond to any
+specific questions or concerns. Or maybe you're actually interested in expanding this project! Whatever it is feel free 
+to send me a message. 
 
+Happy Analyzing! :D 
