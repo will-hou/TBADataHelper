@@ -1,4 +1,4 @@
-A simple package used to perform aggregate and OPR calculations on FRC match data collected from 2016 and onwards.
+A simple package used to perform aggregate and OPR calculations on FRC match data collected in 2016 and onwards.
 
 # Installation
 Make sure you have a TBA Auth Key. Learn what this is and how to get one [here](https://www.thebluealliance.com/apidocs)
@@ -29,7 +29,7 @@ fetcher = TBADataHelper('###MY_AUTHKEY###', 2020)
 The string `'frc'` + the string `'team_number'` ex.) `'frc2521'`
 
 #### `fetcher.get_team_field_statistic()`:  
-Returns a dictionary of calculated statistics mean/min/max/stdev/count for a given field (ex. totalPoints)
+Returns a dictionary of calculated statistics (mean/med/min/max/stdev/count) for a given field (ex. totalPoints)
 #### `fetcher.get_team_OPR_statistic()`:
 Returns a dictionary of the mean/med/min/max/stdev/count of a team's OPR at every competition they've attended that year
 
@@ -37,12 +37,12 @@ Returns a dictionary of the mean/med/min/max/stdev/count of a team's OPR at ever
 The TBA event key for an event. Can be found in the website event url after `event/` ex.) `'2020orore'` 
 
 #### `fetcher.get_event_field_statistics()`:
-Returns a dictionary of calculated statistics mean/med/min/max/stdev/count for a given field (ex. totalPoints)
+Returns a dictionary of calculated statistics (mean/med/min/max/stdev/count) for a given field (ex. totalPoints)
 for all teams at an event
 #### `fetcher.get_event_OPRs()`:
 Returns a dictionary containing the OPR of all teams at an event.
 
-##### Read more about specific method arguments using help() or looking at examples below
+#### Read more about specific method arguments using help() or looking at examples below
 
 # Example Usages
 
@@ -112,9 +112,9 @@ Outputs:
 ```
 
 ### Notes/Contributing/Bug Reports:
-The majority of this package was written in a rush during the 2018 build season. The methods have been tested fairly
+The majority of this package was written in a bit of a rush during the 2018 build season. The methods have been tested fairly
 rigorously for accuracy but I can't guarantee a 100% bug-free experience, especially if you're trying to aggregate data
-for all teams competing in a season. I don't plan on adding any  new features at this time but will respond to any
+from offseason events included in TBA. I don't plan on adding any  new features at this time but will respond to any
 specific questions or concerns. Or maybe you're actually interested in expanding this project! Whatever it is feel free 
 to send me a message. 
 
